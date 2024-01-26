@@ -1,0 +1,11 @@
+go 1.21.6
+
+use (
+    ./leaf
+    ./server
+    ./client
+)
+
+replace (
+    github.com/name5566/leaf v0.0.0 => ./leaf
+)

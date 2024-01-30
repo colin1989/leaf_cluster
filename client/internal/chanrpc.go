@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"client/msg"
 	"fmt"
+	"message"
 	"reflect"
 	"time"
 
@@ -10,26 +10,23 @@ import (
 )
 
 func init() {
-	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
+	skeleton.RegisterChanRPC("NewGameServer", rpcNewAgent)
 	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
 
-	skeleton.RegisterChanRPC(reflect.TypeOf(&msg.Greeting{}), Greeting)
+	skeleton.RegisterChanRPC(reflect.TypeOf(&message.Login{}), Login)
+	skeleton.RegisterChanRPC(reflect.TypeOf(&message.Greeting{}), Greeting)
 }
 
 func rpcNewAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
 	_ = a
 
-	skeleton.Go(func() {
-		time.Sleep(time.Second)
-		a.WriteMsg(&msg.Greeting{
-			Code:    1,
-			Message: "hello from client",
+	skeleton.AfterFunc(time.Second, func() {
+		a.WriteMsg(&message.Login{
+			Server:  1,
+			Account: 1,
 		})
-	}, func() {
-		fmt.Println("write msg")
 	})
-
 	fmt.Println("rpcNewAgent!!!")
 }
 
@@ -39,8 +36,29 @@ func rpcCloseAgent(args []interface{}) {
 	fmt.Println("rpcCloseAgent!!!")
 }
 
+func Login(args []interface{}) {
+	m := args[0].(*message.Login)
+	a := args[1].(gate.Agent)
+
+	if a == nil || m == nil {
+		fmt.Println("Login")
+		return
+	}
+
+	skeleton.Go(func() {
+		time.Sleep(time.Second)
+		a.WriteMsg(&message.Greeting{
+			Code:    1,
+			Message: "hello from client",
+		})
+	}, func() {
+		fmt.Println("Login")
+	})
+
+}
+
 func Greeting(args []interface{}) {
-	m := args[0].(*msg.Greeting)
+	m := args[0].(*message.Greeting)
 	a := args[1].(gate.Agent)
 
 	if a == nil || m == nil {
@@ -55,7 +73,7 @@ func Greeting(args []interface{}) {
 	}
 
 	time.Sleep(time.Second)
-	a.WriteMsg(&msg.Greeting{
+	a.WriteMsg(&message.Greeting{
 		Code:    m.Code + 1,
 		Message: "hello from client",
 	})

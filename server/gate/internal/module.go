@@ -20,7 +20,7 @@ var (
 		MaxConnNum:      20000,
 		PendingWriteNum: 20000,
 		MaxMsgLen:       40960,
-		WSAddr:          "ws://127.0.0.1:13564",
+		WSAddr:          "ws://127.0.0.1:14561",
 		HTTPTimeout:     10 * time.Second,
 		TCPAddr:         "",
 		LenMsgLen:       2,

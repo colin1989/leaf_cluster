@@ -4,6 +4,7 @@ use (
     ./leaf
     ./server
     ./client
+    ./message
 )
 
 replace (

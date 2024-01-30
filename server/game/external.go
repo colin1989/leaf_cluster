@@ -2,7 +2,6 @@ package game
 
 import (
 	"server/game/internal"
-	"server/msg"
 )
 
 var (
@@ -12,5 +11,13 @@ var (
 )
 
 func init() {
-	msg.JSONProcessor.SetRouter(&msg.S2S_Msg{}, ChanRPC)
+	//msg.JSONProcessor.SetRouter(&message.S2S_Msg{}, ChanRPC)
+}
+
+func SetServerID(id int) {
+	internal.SetServerID(id)
+}
+
+func SetWSAddr(addr string) {
+	internal.SetWSAddr(addr)
 }

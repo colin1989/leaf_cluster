@@ -19,7 +19,7 @@ func (gate *Gate) InitClient(ConnNum int) {
 		wsClient.NewAgent = func(conn *network.WSConn) network.Agent {
 			a := &agent{conn: conn, gate: gate}
 			if gate.AgentChanRPC != nil {
-				gate.AgentChanRPC.Go("NewAgent", a)
+				gate.AgentChanRPC.Go("NewGameServer", a)
 			}
 			return a
 		}
@@ -48,7 +48,7 @@ func (gate *Gate) InitClients(ConnAddrs map[string]string) (clients map[int]*net
 		wsClient.NewAgent = func(conn *network.WSConn) network.Agent {
 			a := &agent{conn: conn, gate: gate}
 			if gate.AgentChanRPC != nil {
-				gate.AgentChanRPC.Go("NewAgent", a, id)
+				gate.AgentChanRPC.Go("NewGameServer", a, id)
 			}
 			return a
 		}

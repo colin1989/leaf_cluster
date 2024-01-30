@@ -2,9 +2,9 @@ package internal
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/name5566/leaf/log"
+	"message"
 	"reflect"
-	"server/msg"
 
 	"github.com/name5566/leaf/gate"
 )
@@ -14,23 +14,40 @@ func handleMsg(m interface{}, h interface{}) {
 }
 
 func init() {
-	handleMsg(&msg.S2S_Msg{}, S2S_Msg)
+	handleMsg(&message.Login{}, Login)
+	handleMsg(&message.C2S_Msg{}, C2S_Msg)
+	handleMsg(&message.Greeting{}, Greeting)
 }
 
-func S2S_Msg(args []interface{}) {
-	m := args[0].(*msg.S2S_Msg)
+func C2S_Msg(args []interface{}) {
+	m := args[0].(*message.C2S_Msg)
+	a := args[1].(gate.Agent)
+	_ = a
+
+	log.Info("C2S_Msg ", m)
+}
+
+func Greeting(args []interface{}) {
+	m := args[0].(*message.Greeting)
+	a := args[1].(gate.Agent)
+	_ = a
+
+	log.Info("Greeting ", m.Code, m.Message)
+
+	m.Message = "welcome"
+	b, _ := json.Marshal(&m)
+	_ = b
+	a.WriteMsg(m)
+}
+
+func Login(args []interface{}) {
+	m := args[0].(*message.Login)
 	a := args[1].(gate.Agent)
 
-	var greeting msg.Greeting
-	json.Unmarshal(m.Body, &greeting)
-
-	fmt.Println("from", m.From, "to", m.To, m.MsgID, greeting.Code, greeting.Message)
-
-	greeting.Message = "welcome"
-	b, _ := json.Marshal(&greeting)
-	a.WriteMsg(&msg.S2S_Msg{
-		From: "game",
-		To:   "gate",
-		Body: b,
+	log.Info("Login server : ", m.Server, " account : ", m.Account, " agent : ", m.Agent)
+	a.WriteMsg(&message.Bind{
+		Agent:  m.Agent,
+		UserID: m.Agent,
+		Server: serverID,
 	})
 }

@@ -1,70 +1,130 @@
 package internal
 
 import (
-	"encoding/json"
 	"fmt"
-	"reflect"
-	"server/msg"
-
 	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
+	"message"
+	"reflect"
+	"server/constant"
 )
 
 func handleMsg(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
 }
 
-var Client gate.Agent
-
 func init() {
-	// rpc
-	handleMsg(&msg.S2S_Msg{}, S2S_Msg)
-
-	// client msg
-	handleMsg(&msg.Greeting{}, Greeting)
+	handleMsg(&message.C2S_Msg{}, C2S_Msg)
+	handleMsg(&message.S2C_Msg{}, S2C_Msg)
+	handleMsg(&message.Login{}, Login)
 }
 
-func S2S_Msg(args []interface{}) {
-	m := args[0].(*msg.S2S_Msg)
+//func S2S_Msg(args []interface{}) {
+//	m := args[0].(*message.S2S_Msg)
+//	a := args[1].(gate.Agent) // game server
+//	if a == nil || m == nil {
+//		log.Infof("greeting err")
+//		return
+//	}
+//
+//	b := m.Body
+//	var greeting message.Greeting
+//	_ = json.Unmarshal(b, &greeting)
+//
+//	log.Infof("from", m.From, "to", m.To, greeting.Code, greeting.Message)
+//
+//	// 转发给客户端
+//	if Client != nil {
+//		log.Infof("send to client")
+//		Client.WriteMsg(&greeting)
+//	}
+//}
+
+func C2S_Msg(args []interface{}) {
+	m := args[0].(*message.C2S_Msg)
+	a := args[1].(gate.Agent) // game server
+	if a == nil || m == nil {
+		log.Infof("greeting err")
+		return
+	}
+
+	agentData := a.UserData().(*AgentData)
+	if agentData == nil {
+		log.Infof("agentData == nil")
+		a.Close()
+		return
+	}
+
+	if agentData.serverID == 0 && m.MsgID != constant.LOGIN {
+		log.Infof("the first message must to be LOGIN")
+		a.Close()
+		return
+	}
+
+	server, ok := GameServers[agentData.serverID]
+	if !ok {
+		log.Infof("log in wrong server : ", agentData.serverID)
+		a.Close()
+		return
+	}
+
+	//b, _ := json.Marshal(&m)
+	m.Agent = agentData.agentId
+	m.UserID = agentData.userID
+	server.WriteMsg(m)
+}
+
+func S2C_Msg(args []interface{}) {
+	m := args[0].(*message.S2C_Msg)
 	a := args[1].(gate.Agent) // game server
 	if a == nil || m == nil {
 		fmt.Println("greeting err")
 		return
 	}
 
-	b := m.Body
-	var greeting msg.Greeting
-	_ = json.Unmarshal(b, &greeting)
-
-	fmt.Println("from", m.From, "to", m.To, greeting.Code, greeting.Message)
-
-	// 转发给客户端
-	if Client != nil {
-		fmt.Println("send to client")
-		Client.WriteMsg(&greeting)
+	agent, ok := AgentMap[m.Agent]
+	if !ok {
+		log.Errorf("wrong agent id %v", m.Agent)
+		return
 	}
+	agent.WriteRaw(m.MsgID, m.Body)
 }
 
-func Greeting(args []interface{}) {
-	m := args[0].(*msg.Greeting)
-	a := args[1].(gate.Agent) // client
-	_ = a
-
-	if Client == nil {
-		//TODO 将client agent通过session管理起来
-		Client = a
+func Login(args []interface{}) {
+	m := args[0].(*message.Login)
+	a := args[1].(gate.Agent) // game server
+	if a == nil || m == nil {
+		log.Infof("greeting err")
+		return
 	}
 
-	fmt.Println("greeting", m.Code, m.Message)
-
-	// RPC to game server
-	if GameSvr != nil {
-		fmt.Println("send to game server")
-		b, _ := json.Marshal(&m)
-		GameSvr.WriteMsg(&msg.S2S_Msg{
-			From:  "gate",
-			To:    "game",
-			MsgID: msg.GetMsgId(&msg.Greeting{}),
-			Body:  b,
-		})
+	agentData := a.UserData().(*AgentData)
+	if agentData == nil {
+		log.Infof("agentData == nil")
+		a.Close()
+		return
 	}
+
+	if agentData.serverID != 0 {
+		log.Infof("agent has already logged int ")
+		a.Close()
+		return
+	}
+
+	server, ok := GameServers[m.Server]
+	if !ok {
+		log.Infof("log in wrong server : ", m.Server)
+		a.Close()
+		return
+	}
+
+	//b, _ := json.Marshal(&m)
+	//server.WriteMsg(&message.S2S_Msg{
+	//	From:  "gate",
+	//	To:    "game",
+	//	MsgID: message.GetMsgId(m),
+	//	Body:  b,
+	//})
+	m.Agent = agentData.agentId
+	server.WriteMsg(m)
 }

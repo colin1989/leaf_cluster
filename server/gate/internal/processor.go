@@ -1,10 +1,10 @@
 package internal
 
 import (
-	"fmt"
+	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/network"
+	"message"
 	"reflect"
-	"server/msg"
 )
 
 type ForwardProcessor struct {
@@ -17,19 +17,23 @@ var _ network.Processor = (*ForwardProcessor)(nil)
 func NewForwardProcessor(p network.Processor) *ForwardProcessor {
 	return &ForwardProcessor{
 		processor: p,
+		mapMsg:    map[string]reflect.Type{},
 	}
 }
 
 func (f *ForwardProcessor) Route(m interface{}, userData interface{}) error {
-	fmt.Printf("ForwardProcessor Route: %+v", m)
+	log.Infof("ForwardProcessor Route: %+v", m)
 
-	if _, ok := m.(*msg.S2S_Msg); ok {
+	if _, ok := m.(*message.S2S_Msg); ok {
+		return f.processor.Route(m, userData)
+	}
+	if _, ok := m.(*message.S2C_Msg); ok {
 		return f.processor.Route(m, userData)
 	}
 
-	if _, ok := m.(*msg.C2S_Msg); ok {
-		return f.processor.Route(m, userData)
-	}
+	//if _, ok := m.(*message.C2S_Msg); ok {
+	//	return f.processor.Route(m, userData)
+	//}
 
 	return f.Forward(m, userData)
 }
@@ -41,8 +45,12 @@ func (f *ForwardProcessor) Unmarshal(data []byte) (interface{}, error) {
 	}
 
 	switch m := v.(type) {
-	case *msg.S2S_Msg, *msg.C2S_Msg:
+	case *message.S2S_Msg, *message.S2S_Reg, *message.Bind:
 		return m, nil
+	case *message.S2C_Msg:
+		return m, nil
+	//case *message.S2S_Msg, *message.C2S_Msg:
+	//	return m, nil
 	default:
 		// 需要转发的消息
 		return data, nil
@@ -55,19 +63,19 @@ func (f *ForwardProcessor) Marshal(msg interface{}) ([][]byte, error) {
 
 func (f *ForwardProcessor) Forward(m interface{}, userData interface{}) error {
 	//TODO implement me
-	msgID := msg.GetMsgId(m)
+	msgID := message.GetMsgId(m)
 	if _, ok := f.mapMsg[msgID]; !ok {
 		f.mapMsg[msgID] = reflect.TypeOf(m)
 	}
 
-	b, ok := m.([]byte)
-	if ok {
-		c2s := &msg.C2S_Msg{
-			MsgID: msg.GetMsgId(m),
-			Body:  b,
-		}
-		return f.processor.Route(c2s, userData)
-	}
+	//b, ok := m.([]byte)
+	//if ok {
+	//	c2s := &message.C2S_Msg{
+	//		MsgID: message.GetMsgId(m),
+	//		Body:  b,
+	//	}
+	//	return f.processor.Route(c2s, userData)
+	//}
 
 	return f.processor.Route(m, userData)
 }

@@ -22,6 +22,7 @@ func Run(mods ...module.Module) {
 		Addr:  conf.LogAddr,
 		Tag:   conf.LogTag,
 	}
+	config.Level = "debug"
 	log.SetLogger(zap.NewLogger(config.BuildOption()...))
 
 	log.Infof("dhf %v starting up", version)

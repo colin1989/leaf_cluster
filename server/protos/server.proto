@@ -1,0 +1,15 @@
+syntax = "proto3";
+package actor;
+option go_package = "server/protos";
+
+enum ServerType {
+  NULL = 0;
+  Gate = 1;
+  Game = 2;
+}
+
+message Server {
+  int32 ID = 1;
+  string Address = 2;
+  ServerType Typ = 3;
+}

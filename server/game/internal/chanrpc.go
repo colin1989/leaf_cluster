@@ -2,24 +2,36 @@ package internal
 
 import (
 	"fmt"
-	"github.com/name5566/leaf/gate"
 	"message"
+	"server/protos"
+
+	"github.com/name5566/leaf/gate"
 )
 
+const NewWorldAgentFunc = "NewWorldFunc"
+
 func init() {
+	skeleton.RegisterChanRPC(NewWorldAgentFunc, NewWorldFunc)
 	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
 	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
 }
 
+func NewWorldFunc(args []interface{}) {
+	a := args[0].(gate.Agent)
+	//a.SetUserData(&GameData{})
+
+	a.WriteMsg(&message.S2S_Reg{Server: &protos.Server{
+		ID:      serverID,
+		Address: wsAddr,
+		Typ:     protos.ServerType_Game,
+	}})
+	fmt.Println("rpcNewWorldFunc!!!")
+}
+
 func rpcNewAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
-
-	reg := new(message.S2S_Reg)
-	reg.Key = Key
-	reg.Id = serverID
-	reg.Ip = wsAddr
-
-	a.WriteMsg(reg)
+	_ = a
+	//a.WriteMsg()
 
 	fmt.Println("rpcNewAgent!!!")
 }

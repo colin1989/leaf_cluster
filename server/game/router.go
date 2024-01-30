@@ -2,7 +2,7 @@ package game
 
 import (
 	"message"
-	"server/msg"
+	"server/game/msg"
 )
 
 func init() {

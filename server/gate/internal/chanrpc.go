@@ -2,33 +2,56 @@ package internal
 
 import (
 	"fmt"
+	"message"
+	"server/gate/constant"
+	"server/protos"
+
+	"github.com/name5566/leaf/log"
+
+	"github.com/name5566/leaf/network"
+
 	"github.com/name5566/leaf/gate"
 )
-
-type GameData struct {
-	serverID int
-}
 
 type AgentData struct {
 	accID    int
 	userID   int
-	serverID int
+	serverID int32
 	agentId  int
 }
 
-var GameServers = map[int]gate.Agent{}
+var GameClients = map[int32]*network.WSClient{}
+var GameServers = map[int32]gate.Agent{}
 var AgentMap = map[int]gate.Agent{}
 
 func init() {
-	skeleton.RegisterChanRPC("NewGameServer", NewGameServer)
+	skeleton.RegisterChanRPC(constant.NewWorldFunc, NewWorldFunc)
+	skeleton.RegisterChanRPC(constant.NewGameFunc, NewGameFunc)
 	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
 	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
 }
 
-func NewGameServer(args []interface{}) {
+func NewWorldFunc(args []interface{}) {
 	a := args[0].(gate.Agent)
-	a.SetUserData(&GameData{})
+	//a.SetUserData(&GameData{})
 
+	a.WriteMsg(&message.S2S_Reg{Server: &protos.Server{
+		ID:      1000,
+		Address: "127.0.0.1:13563",
+		Typ:     protos.ServerType_Gate,
+	}})
+	fmt.Println("rpcNewWorldFunc!!!")
+}
+
+func NewGameFunc(args []interface{}) {
+	a := args[0].(gate.Agent)
+	sid := args[1].(int32)
+
+	_, ok := GameServers[sid]
+	if ok {
+		log.Error("重复连接游戏服", log.Int32("sid", sid))
+	}
+	GameServers[sid] = a
 	fmt.Println("rpcNewGameServer!!!")
 }
 
@@ -50,11 +73,6 @@ func rpcCloseAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
 
 	switch data := a.UserData().(type) {
-	case *GameData:
-		if data.serverID == 0 {
-			return
-		}
-		delete(GameServers, data.serverID)
 	case *AgentData:
 		if data.agentId == 0 {
 			return

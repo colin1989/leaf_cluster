@@ -14,7 +14,7 @@ func init() {
 	//msg.JSONProcessor.SetRouter(&message.S2S_Msg{}, ChanRPC)
 }
 
-func SetServerID(id int) {
+func SetServerID(id int32) {
 	internal.SetServerID(id)
 }
 

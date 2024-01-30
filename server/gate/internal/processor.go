@@ -1,10 +1,11 @@
 package internal
 
 import (
-	"github.com/name5566/leaf/log"
-	"github.com/name5566/leaf/network"
 	"message"
 	"reflect"
+
+	"github.com/name5566/leaf/log"
+	"github.com/name5566/leaf/network"
 )
 
 type ForwardProcessor struct {
@@ -45,9 +46,10 @@ func (f *ForwardProcessor) Unmarshal(data []byte) (interface{}, error) {
 	}
 
 	switch m := v.(type) {
-	case *message.S2S_Msg, *message.S2S_Reg, *message.Bind:
-		return m, nil
-	case *message.S2C_Msg:
+	case *message.W2S_GS,
+		*message.S2S_Msg,
+		*message.S2C_Msg,
+		*message.Bind:
 		return m, nil
 	//case *message.S2S_Msg, *message.C2S_Msg:
 	//	return m, nil
@@ -58,7 +60,11 @@ func (f *ForwardProcessor) Unmarshal(data []byte) (interface{}, error) {
 }
 
 func (f *ForwardProcessor) Marshal(msg interface{}) ([][]byte, error) {
-	return f.processor.Marshal(msg)
+	data, err := f.processor.Marshal(msg)
+	if err != nil {
+		data = [][]byte{msg.([]byte)}
+	}
+	return data, nil
 }
 
 func (f *ForwardProcessor) Forward(m interface{}, userData interface{}) error {

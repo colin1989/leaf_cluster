@@ -2,8 +2,9 @@ package internal
 
 import (
 	"fmt"
-	"github.com/name5566/leaf/gate"
 	"server/protos"
+
+	"github.com/name5566/leaf/gate"
 )
 
 func init() {

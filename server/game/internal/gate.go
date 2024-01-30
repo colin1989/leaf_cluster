@@ -2,9 +2,10 @@ package internal
 
 import (
 	"fmt"
-	"github.com/name5566/leaf/gate"
-	"server/msg"
+	"server/game/msg"
 	"time"
+
+	"github.com/name5566/leaf/gate"
 )
 
 type GateModule struct {
@@ -24,6 +25,7 @@ func (m *GateModule) OnInit() {
 		Processor:       msg.JSONProcessor,
 		AgentChanRPC:    ChanRPC,
 	}
+	m.Gate.Connect(0, "127.0.0.1:13560", NewWorldAgentFunc, 1)
 }
 
 func (m *GateModule) OnDestroy() {

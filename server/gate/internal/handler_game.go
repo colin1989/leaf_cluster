@@ -1,28 +1,27 @@
 package internal
 
 import (
-	"fmt"
-	"github.com/name5566/leaf/gate"
-	"github.com/name5566/leaf/log"
 	"message"
+
+	"github.com/name5566/leaf/log"
 )
 
 func init() {
 	// rpc
-	handleMsg(&message.S2S_Reg{}, S2S_Reg)
 	handleMsg(&message.Bind{}, Bind)
+	handleMsg(&message.S2C_Msg{}, S2C_Msg)
 }
 
-func S2S_Reg(args []interface{}) {
-	m := args[0].(*message.S2S_Reg)
-	a := args[1].(gate.Agent) // game server
-	if a == nil || m == nil {
-		fmt.Println("greeting err")
+func S2C_Msg(args []interface{}) {
+	m := args[0].(*message.S2C_Msg)
+	//a := args[1].(gate.Agent) // game server
+
+	agent, ok := AgentMap[m.Agent]
+	if !ok {
+		log.Errorf("wrong agent id %v", m.Agent)
 		return
 	}
-
-	a.UserData().(*GameData).serverID = m.Id
-	GameServers[m.Id] = a
+	agent.WriteRaw(m.Body)
 }
 
 func Bind(args []interface{}) {

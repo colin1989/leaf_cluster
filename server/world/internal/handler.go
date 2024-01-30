@@ -1,11 +1,12 @@
 package internal
 
 import (
-	"github.com/name5566/leaf/gate"
-	"github.com/name5566/leaf/log"
 	"message"
 	"reflect"
 	"server/protos"
+
+	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
 )
 
 func handleMsg(m interface{}, h interface{}) {
@@ -33,6 +34,10 @@ func S2S_Reg(args []interface{}) {
 	}
 }
 
+// gameOnline
+//
+//	@Description: 游戏服上线，通知所有网关服
+//	@param game
 func gameOnline(game *protos.Server) {
 	gates := manager.GetServers(protos.ServerType_Gate)
 	for _, sa := range gates {
@@ -42,11 +47,18 @@ func gameOnline(game *protos.Server) {
 	}
 }
 
+// gateOnline
+//
+//	@Description: 网关服上线，推送所有游戏服数据
+//	@param gateAgent
 func gateOnline(gateAgent gate.Agent) {
 	game := manager.GetServers(protos.ServerType_Game)
 	servers := make([]*protos.Server, 0, len(game))
 	for _, sa := range game {
 		servers = append(servers, sa.Server)
+	}
+	if len(servers) == 0 {
+		return
 	}
 	gateAgent.WriteMsg(&message.W2S_GS{
 		Servers: servers,

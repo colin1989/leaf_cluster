@@ -2,12 +2,13 @@ package internal
 
 import (
 	"fmt"
-	"github.com/name5566/leaf/module"
 	"server/base"
-	"server/msg"
+	"server/gate/constant"
+	"server/gate/msg"
 	"time"
 
 	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/module"
 )
 
 var (
@@ -39,8 +40,9 @@ func (m *Module) OnInit() {
 
 	m.Skeleton = skeleton
 
+	Gate.Connect(0, "127.0.0.1:13560", constant.NewWorldFunc, 1)
 	//连接Game服
-	Gate.InitClient(1)
+	//Gate.InitClient(1)
 	//clients := Gate.InitClients(mapAddrs)
 }
 

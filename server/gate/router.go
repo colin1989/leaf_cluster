@@ -1,12 +1,12 @@
-package internal
+package gate
 
 import (
 	"message"
-	"server/msg"
+	"server/gate/msg"
 )
 
 func init() {
-	msg.JSONProcessor.SetRouter(&message.S2S_Reg{}, ChanRPC)
+	msg.JSONProcessor.SetRouter(&message.W2S_GS{}, ChanRPC)
 	msg.JSONProcessor.SetRouter(&message.C2S_Msg{}, ChanRPC)
 	msg.JSONProcessor.SetRouter(&message.S2C_Msg{}, ChanRPC)
 	// 消息路由到Game server

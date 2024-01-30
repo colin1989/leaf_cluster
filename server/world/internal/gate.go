@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"server/gate/msg"
+	"server/world/msg"
 	"time"
 
 	"github.com/name5566/leaf/gate"
@@ -13,22 +13,22 @@ type GateModule struct {
 }
 
 func (m *GateModule) OnInit() {
-	fmt.Println("module init")
+	fmt.Println("world gate module init")
 
 	m.Gate = &gate.Gate{
 		MaxConnNum:      20000,
 		PendingWriteNum: 20000,
 		MaxMsgLen:       40960,
-		WSAddr:          "127.0.0.1:13563",
+		WSAddr:          "127.0.0.1:13560",
 		HTTPTimeout:     10 * time.Second,
 		TCPAddr:         "",
 		LenMsgLen:       2,
 		LittleEndian:    false,
-		Processor:       NewGateProcessor(msg.JSONProcessor),
+		Processor:       msg.JSONProcessor,
 		AgentChanRPC:    ChanRPC,
 	}
 }
 
 func (m *GateModule) OnDestroy() {
-	fmt.Println("module destroy")
+	fmt.Println("world gate module destroy")
 }

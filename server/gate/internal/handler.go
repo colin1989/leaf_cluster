@@ -1,12 +1,12 @@
 package internal
 
 import (
-	"fmt"
-	"github.com/name5566/leaf/gate"
-	"github.com/name5566/leaf/log"
 	"message"
 	"reflect"
-	"server/constant"
+	"server/gate/constant"
+
+	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
 )
 
 func handleMsg(m interface{}, h interface{}) {
@@ -14,9 +14,30 @@ func handleMsg(m interface{}, h interface{}) {
 }
 
 func init() {
+	handleMsg(&message.W2S_GS{}, W2S_GS)
 	handleMsg(&message.C2S_Msg{}, C2S_Msg)
-	handleMsg(&message.S2C_Msg{}, S2C_Msg)
 	handleMsg(&message.Login{}, Login)
+}
+
+// W2S_GS
+//
+//	@Description: world推送游戏服信息
+//	@param args
+func W2S_GS(args []interface{}) {
+	m := args[0].(*message.W2S_GS)
+	//a := args[1].(gate.Agent)
+
+	for _, server := range m.Servers {
+		// TODO 这个地方可能会有问题
+		if _, ok := GameClients[server.ID]; ok {
+			GameClients[server.ID].Close()
+		}
+		if _, ok := GameServers[server.ID]; ok {
+			GameServers[server.ID].Close()
+			delete(GameServers, server.ID)
+		}
+		GameClients[server.ID] = Gate.Connect(server.ID, server.Address, constant.NewGameFunc, 1)
+	}
 }
 
 //func S2S_Msg(args []interface{}) {
@@ -55,7 +76,7 @@ func C2S_Msg(args []interface{}) {
 		return
 	}
 
-	if agentData.serverID == 0 && m.MsgID != constant.LOGIN {
+	if agentData.serverID == 0 && m.MsgID != "login" {
 		log.Infof("the first message must to be LOGIN")
 		a.Close()
 		return
@@ -71,23 +92,7 @@ func C2S_Msg(args []interface{}) {
 	//b, _ := json.Marshal(&m)
 	m.Agent = agentData.agentId
 	m.UserID = agentData.userID
-	server.WriteMsg(m)
-}
-
-func S2C_Msg(args []interface{}) {
-	m := args[0].(*message.S2C_Msg)
-	a := args[1].(gate.Agent) // game server
-	if a == nil || m == nil {
-		fmt.Println("greeting err")
-		return
-	}
-
-	agent, ok := AgentMap[m.Agent]
-	if !ok {
-		log.Errorf("wrong agent id %v", m.Agent)
-		return
-	}
-	agent.WriteRaw(m.MsgID, m.Body)
+	server.WriteMsg(m.Body)
 }
 
 func Login(args []interface{}) {

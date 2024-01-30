@@ -7,13 +7,18 @@ import (
 	"github.com/name5566/leaf"
 )
 
-func main() {
-	var ServerID int
-	var wsAddr string
+var ServerID int
+var wsAddr string
+
+func init() {
 	flag.IntVar(&ServerID, "s", 1, "用户名,默认为空")
 	flag.StringVar(&wsAddr, "ws", "127.0.0.1:14561", "用户名,默认为空")
+}
 
-	game.SetServerID(ServerID)
+func main() {
+	flag.Parse()
+
+	game.SetServerID(int32(ServerID))
 	game.SetWSAddr(wsAddr)
 	leaf.Run(
 		game.Module,

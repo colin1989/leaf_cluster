@@ -6,6 +6,28 @@ import (
 	"github.com/name5566/leaf/network"
 )
 
+func (gate *Gate) Connect(id int32, addr string, newAgentFunc string, connNum int) *network.WSClient {
+	wsClient := new(network.WSClient)
+	wsClient.Addr = "ws://" + addr
+	wsClient.ConnNum = connNum
+	wsClient.AutoReconnect = true
+	wsClient.PendingWriteNum = gate.PendingWriteNum
+	wsClient.MaxMsgLen = gate.MaxMsgLen
+	wsClient.NewAgent = func(conn *network.WSConn) network.Agent {
+		a := &agent{conn: conn, gate: gate}
+		if gate.AgentChanRPC != nil {
+			gate.AgentChanRPC.Go(newAgentFunc, a, id)
+		}
+		return a
+	}
+
+	if wsClient != nil {
+		wsClient.Start()
+	}
+
+	return wsClient
+}
+
 func (gate *Gate) InitClient(ConnNum int) {
 
 	var wsClient *network.WSClient

@@ -1,9 +1,10 @@
 package internal
 
 import (
+	"server/protos"
+
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
-	"server/protos"
 )
 
 type ServerAgent struct {

@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/name5566/leaf/log"
+
 	"github.com/name5566/leaf/gate"
 )
 
@@ -19,11 +21,12 @@ func init() {
 
 func rpcNewAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
-	_ = a
+
+	log.Info("Connect to server", log.Int32("ServerID", serverID))
 
 	skeleton.AfterFunc(time.Second, func() {
 		a.WriteMsg(&message.Login{
-			Server:  1,
+			Server:  serverID,
 			Account: 1,
 		})
 	})

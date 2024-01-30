@@ -179,7 +179,7 @@ func (a *agent) WriteMsg(msg interface{}) {
 	}
 }
 
-func (a *agent) WriteRaw(msgId string, data []byte) {
+func (a *agent) WriteRaw(data []byte) {
 	if a.gate.Processor != nil {
 		//压缩前
 		oldLen := len(data)
@@ -212,7 +212,7 @@ func (a *agent) WriteRaw(msgId string, data []byte) {
 
 	err := a.conn.WriteMsg(data)
 	if err != nil {
-		log.Errorf("write message %v error: %v", msgId, err)
+		log.Errorf("write message %v error: %v", data, err)
 	}
 }
 

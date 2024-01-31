@@ -22,10 +22,11 @@ func (m *GateModule) OnInit() {
 		TCPAddr:         "",
 		LenMsgLen:       2,
 		LittleEndian:    false,
-		Processor:       msg.JSONProcessor,
-		AgentChanRPC:    ChanRPC,
+		//Processor:       NewGameMsgProcessor(msg.JSONProcessor),
+		Processor:    msg.JSONProcessor,
+		AgentChanRPC: ChanRPC,
 	}
-	m.Gate.Connect(0, "127.0.0.1:13560", NewWorldAgentFunc, 1)
+	m.Gate.Connect(0, "127.0.0.1:12345", NewWorldAgentFunc, 1)
 }
 
 func (m *GateModule) OnDestroy() {

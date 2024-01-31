@@ -72,3 +72,7 @@ Game -> World (broadcast)-> Gate(s)
   ```
 
 ## 网关动态链接方案
+
+
+## TODO
+- [ ] 服务状态

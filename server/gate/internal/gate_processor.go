@@ -1,11 +1,14 @@
 package internal
 
 import (
+	"message"
+
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/network"
-	"message"
 )
 
+// GateProcessor
+// @Description: 客户端消息处理
 type GateProcessor struct {
 	processor network.Processor
 }
@@ -27,9 +30,10 @@ func (g *GateProcessor) Route(msg interface{}, userData interface{}) error {
 func (g *GateProcessor) Unmarshal(data []byte) (interface{}, error) {
 	v, err := g.processor.Unmarshal(data)
 	if err != nil {
+		// 反序列化失败，封装成 C2S 走玩家已登录处理流程
 		c2s := &message.C2S_Msg{
-			MsgID: message.GetMsgId(data),
-			Body:  data,
+			//MsgID: message.GetMsgId(data),
+			Body: data,
 		}
 		return c2s, nil
 	}

@@ -29,19 +29,20 @@ func W2S_GS(args []interface{}) {
 
 	for _, server := range m.Servers {
 		// TODO 这个地方可能会有问题
-		if _, ok := GameClients[server.ID]; ok {
-			GameClients[server.ID].Close()
+		if client, ok := GameClients[server.ID]; ok {
+			// Close 里面有个wait...
+			go client.Close()
 		}
-		if _, ok := GameServers[server.ID]; ok {
-			GameServers[server.ID].Close()
-			delete(GameServers, server.ID)
+		if _, ok := GameAgents[server.ID]; ok {
+			GameAgents[server.ID].Close()
+			delete(GameAgents, server.ID)
 		}
 		GameClients[server.ID] = Gate.Connect(server.ID, server.Address, constant.NewGameFunc, 1)
 	}
 }
 
-//func S2S_Msg(args []interface{}) {
-//	m := args[0].(*message.S2S_Msg)
+//func Gate_Forward(args []interface{}) {
+//	m := args[0].(*message.Gate_Forward)
 //	a := args[1].(gate.Agent) // game server
 //	if a == nil || m == nil {
 //		log.Infof("greeting err")
@@ -76,23 +77,26 @@ func C2S_Msg(args []interface{}) {
 		return
 	}
 
-	if agentData.serverID == 0 && m.MsgID != "login" {
+	if agentData.serverID == 0 {
 		log.Infof("the first message must to be LOGIN")
 		a.Close()
 		return
 	}
 
-	server, ok := GameServers[agentData.serverID]
-	if !ok {
-		log.Infof("log in wrong server : ", agentData.serverID)
+	msg := &message.Gate_Forward{
+		From:   "",
+		To:     "",
+		MsgID:  "",
+		Agent:  agentData.agentId,
+		UserID: agentData.userID,
+		Body:   m.Body,
+	}
+
+	if err := SendToGame(agentData.serverID, msg); err != nil {
+		log.Infof("SendToGame error : ", agentData.serverID)
 		a.Close()
 		return
 	}
-
-	//b, _ := json.Marshal(&m)
-	m.Agent = agentData.agentId
-	m.UserID = agentData.userID
-	server.WriteMsg(m.Body)
 }
 
 func Login(args []interface{}) {
@@ -116,20 +120,11 @@ func Login(args []interface{}) {
 		return
 	}
 
-	server, ok := GameServers[m.Server]
-	if !ok {
-		log.Infof("log in wrong server : ", m.Server)
+	m.Agent = agentData.agentId
+
+	if err := SendToGame(m.Server, m); err != nil {
+		log.Infof("SendToGame error : ", agentData.serverID)
 		a.Close()
 		return
 	}
-
-	//b, _ := json.Marshal(&m)
-	//server.WriteMsg(&message.S2S_Msg{
-	//	From:  "gate",
-	//	To:    "game",
-	//	MsgID: message.GetMsgId(m),
-	//	Body:  b,
-	//})
-	m.Agent = agentData.agentId
-	server.WriteMsg(m)
 }

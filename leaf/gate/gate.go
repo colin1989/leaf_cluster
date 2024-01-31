@@ -180,35 +180,33 @@ func (a *agent) WriteMsg(msg interface{}) {
 }
 
 func (a *agent) WriteRaw(data []byte) {
-	if a.gate.Processor != nil {
-		//压缩前
-		oldLen := len(data)
+	//压缩前
+	oldLen := len(data)
 
-		//数据压缩
-		encodeData, encodeErr := compress.Encode(data)
-		if encodeErr != nil {
-			log.ErrorW("compress.Encode error", log.String("err", encodeErr.Error()), log.String("data", string(data)))
-			return
-		}
-		data = encodeData
-
-		//压缩后
-		newLen := len(data)
-
-		//sizeLimit := 1024 * 10
-		sizeLimit := conf.MsgSizeLimit
-		if oldLen > sizeLimit {
-			text := compress.Name() + "压缩比"
-			name := fmt.Sprint(reflect.TypeOf(data))
-			log.WarnW(text,
-				log.String("消息名", name),
-				log.Int("压缩前", oldLen),
-				log.Int("压缩后", newLen),
-				log.Float64("压缩比", float64(newLen)/float64(oldLen)))
-		}
-
-		encrypt(data)
+	//数据压缩
+	encodeData, encodeErr := compress.Encode(data)
+	if encodeErr != nil {
+		log.ErrorW("compress.Encode error", log.String("err", encodeErr.Error()), log.String("data", string(data)))
+		return
 	}
+	data = encodeData
+
+	//压缩后
+	newLen := len(data)
+
+	//sizeLimit := 1024 * 10
+	sizeLimit := conf.MsgSizeLimit
+	if oldLen > sizeLimit {
+		text := compress.Name() + "压缩比"
+		name := fmt.Sprint(reflect.TypeOf(data))
+		log.WarnW(text,
+			log.String("消息名", name),
+			log.Int("压缩前", oldLen),
+			log.Int("压缩后", newLen),
+			log.Float64("压缩比", float64(newLen)/float64(oldLen)))
+	}
+
+	encrypt(data)
 
 	err := a.conn.WriteMsg(data)
 	if err != nil {

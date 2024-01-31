@@ -40,7 +40,7 @@ func (m *Module) OnInit() {
 
 	m.Skeleton = skeleton
 
-	Gate.Connect(0, "127.0.0.1:13560", constant.NewWorldFunc, 1)
+	Gate.Connect(0, "127.0.0.1:12345", constant.NewWorldFunc, 1)
 	//连接Game服
 	//Gate.InitClient(1)
 	//clients := Gate.InitClients(mapAddrs)

@@ -28,6 +28,8 @@ func NewWorldFunc(args []interface{}) {
 	fmt.Println("rpcNewWorldFunc!!!")
 }
 
+var Users = map[int]*UserData{}
+
 func rpcNewAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
 	_ = a

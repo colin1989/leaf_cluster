@@ -1,5 +1,5 @@
 ServerID ?= 1
-Address ?= 127.0.0.1:14561
+Address ?= 127.0.0.1:13561
 
 .PHONY: world
 # gate-server
@@ -9,7 +9,7 @@ world:
 .PHONY: gate
 # gate-server
 gate:
-	go run server/cmd/gate_server/main.go
+	go run server/cmd/gate_server/main.go -s=$(ServerID) -ws=$(Address)
 
 .PHONY: login
 # login-server
@@ -18,10 +18,10 @@ login:
 
 .PHONY: game
 # game-server
-game1:
+game:
 	go run server/cmd/game_server/main.go -s=$(ServerID) -ws=$(Address)
 
 .PHONY: client
 # client for test
 client:
-	go run ./client/. -s=$(ServerID)
+	go run ./client/.

@@ -6,5 +6,6 @@ import (
 )
 
 func init() {
+	msg.JSONProcessor.SetRouter(&message.C2S_Gates{}, ChanRPC)
 	msg.JSONProcessor.SetRouter(&message.S2S_Reg{}, ChanRPC)
 }

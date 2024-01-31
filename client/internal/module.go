@@ -20,10 +20,14 @@ func (m *Module) OnInit() {
 
 	m.Skeleton = skeleton
 
-	//连接Gate服
-	Gate.InitClient(1)
+	connectWorld()
 }
 
 func (m *Module) OnDestroy() {
 	fmt.Println("module destroy")
+}
+
+func connectWorld() {
+	client := Gate.Connect(1, "127.0.0.1:12345", "NewWorldServer", 1)
+	client.AutoReconnect = false
 }

@@ -1,34 +1,35 @@
 package internal
 
 import (
-	"github.com/name5566/leaf/network"
 	"message"
+
+	"github.com/name5566/leaf/network"
 )
 
-type GateMsgProcessor struct {
+type GameProcessor struct {
 	processor network.Processor
 }
 
-var _ network.Processor = (*GateMsgProcessor)(nil)
+var _ network.Processor = (*GameProcessor)(nil)
 
-func NewGateMsgProcessor(p network.Processor) *GateMsgProcessor {
-	return &GateMsgProcessor{
+func NewGameMsgProcessor(p network.Processor) *GameProcessor {
+	return &GameProcessor{
 		processor: p,
 	}
 }
 
-func (f *GateMsgProcessor) Route(m interface{}, userData interface{}) error {
+func (f *GameProcessor) Route(m interface{}, userData interface{}) error {
 	return f.processor.Route(m, userData)
 }
 
-func (f *GateMsgProcessor) Unmarshal(data []byte) (interface{}, error) {
+func (f *GameProcessor) Unmarshal(data []byte) (interface{}, error) {
 	v, err := f.processor.Unmarshal(data)
 	if err != nil {
 		return nil, err
 	}
 
 	switch m := v.(type) {
-	case *message.S2S_Msg:
+	case *message.Gate_Forward:
 		// 解析body
 		body, e := f.processor.Unmarshal(m.Body)
 		if e != nil {
@@ -40,16 +41,18 @@ func (f *GateMsgProcessor) Unmarshal(data []byte) (interface{}, error) {
 	}
 }
 
-func (f *GateMsgProcessor) Marshal(v interface{}) ([][]byte, error) {
-	body, err := f.processor.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
+func (f *GameProcessor) Marshal(v interface{}) ([][]byte, error) {
+	//body, err := f.processor.Marshal(v)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//// 包装为S2S_Msg消息
+	//m := &message.Gate_Forward{
+	//	MsgID: message.GetMsgId(v),
+	//	Body:  body[0],
+	//}
+	//return f.processor.Marshal(m)
 
-	// 包装为S2S_Msg消息
-	m := &message.S2S_Msg{
-		MsgID: message.GetMsgId(v),
-		Body:  body[0],
-	}
-	return f.processor.Marshal(m)
+	return f.processor.Marshal(v)
 }

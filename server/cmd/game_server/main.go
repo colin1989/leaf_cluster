@@ -11,8 +11,8 @@ var ServerID int
 var wsAddr string
 
 func init() {
-	flag.IntVar(&ServerID, "s", 1, "用户名,默认为空")
-	flag.StringVar(&wsAddr, "ws", "127.0.0.1:14561", "用户名,默认为空")
+	flag.IntVar(&ServerID, "s", 1, "服务器ID")
+	flag.StringVar(&wsAddr, "ws", "127.0.0.1:14561", "websocket 地址")
 }
 
 func main() {

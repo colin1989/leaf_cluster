@@ -8,21 +8,8 @@ import (
 
 	"github.com/name5566/leaf/log"
 
-	"github.com/name5566/leaf/network"
-
 	"github.com/name5566/leaf/gate"
 )
-
-type AgentData struct {
-	accID    int
-	userID   int
-	serverID int32
-	agentId  int
-}
-
-var GameClients = map[int32]*network.WSClient{}
-var GameServers = map[int32]gate.Agent{}
-var AgentMap = map[int]gate.Agent{}
 
 func init() {
 	skeleton.RegisterChanRPC(constant.NewWorldFunc, NewWorldFunc)
@@ -36,8 +23,8 @@ func NewWorldFunc(args []interface{}) {
 	//a.SetUserData(&GameData{})
 
 	a.WriteMsg(&message.S2S_Reg{Server: &protos.Server{
-		ID:      1000,
-		Address: "127.0.0.1:13563",
+		ID:      serverID,
+		Address: wsAddr,
 		Typ:     protos.ServerType_Gate,
 	}})
 	fmt.Println("rpcNewWorldFunc!!!")
@@ -47,11 +34,11 @@ func NewGameFunc(args []interface{}) {
 	a := args[0].(gate.Agent)
 	sid := args[1].(int32)
 
-	_, ok := GameServers[sid]
+	_, ok := GameAgents[sid]
 	if ok {
 		log.Error("重复连接游戏服", log.Int32("sid", sid))
 	}
-	GameServers[sid] = a
+	GameAgents[sid] = a
 	fmt.Println("rpcNewGameServer!!!")
 }
 
@@ -78,6 +65,7 @@ func rpcCloseAgent(args []interface{}) {
 			return
 		}
 		delete(AgentMap, data.agentId)
+		SendToGame(data.serverID, &message.Disconnect{UserID: data.userID})
 	}
 	fmt.Println("rpcCloseAgent!!!")
 }

@@ -8,8 +8,9 @@ import (
 
 func init() {
 	// rpc
-	handleMsg(&message.Bind{}, Bind)
+	handleMsg(&message.Kick{}, Kick)
 	handleMsg(&message.S2C_Msg{}, S2C_Msg)
+	handleMsg(&message.Bind{}, Bind)
 }
 
 func S2C_Msg(args []interface{}) {
@@ -22,6 +23,17 @@ func S2C_Msg(args []interface{}) {
 		return
 	}
 	agent.WriteRaw(m.Body)
+}
+
+func Kick(args []interface{}) {
+	m := args[0].(*message.Kick)
+
+	agent, ok := AgentMap[m.Agent]
+	if !ok {
+		log.Errorf("wrong agent id %v", m.Agent)
+		return
+	}
+	agent.Close()
 }
 
 func Bind(args []interface{}) {

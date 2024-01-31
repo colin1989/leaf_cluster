@@ -19,7 +19,7 @@ func (m *GateModule) OnInit() {
 		MaxConnNum:      20000,
 		PendingWriteNum: 20000,
 		MaxMsgLen:       40960,
-		WSAddr:          "127.0.0.1:13560",
+		WSAddr:          "127.0.0.1:12345",
 		HTTPTimeout:     10 * time.Second,
 		TCPAddr:         "",
 		LenMsgLen:       2,

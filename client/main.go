@@ -1,7 +1,6 @@
 package main
 
 import (
-	"client/internal"
 	"flag"
 	"fmt"
 
@@ -11,13 +10,12 @@ import (
 var ServerID int
 
 func init() {
-	flag.IntVar(&ServerID, "s", 1, "用户名,默认为空")
+	flag.IntVar(&ServerID, "s", 1, "连接游戏服ID")
 }
 
 func main() {
 	flag.Parse()
 
-	internal.SetServerID(int32(ServerID))
 	fmt.Println("client run...")
 	leaf.Run(Module)
 }

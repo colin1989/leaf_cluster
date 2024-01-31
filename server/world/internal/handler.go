@@ -14,7 +14,28 @@ func handleMsg(m interface{}, h interface{}) {
 }
 
 func init() {
+	handleMsg(&message.C2S_Gates{}, C2S_Gates)
 	handleMsg(&message.S2S_Reg{}, S2S_Reg)
+}
+
+func C2S_Gates(args []interface{}) {
+	//m := args[0].(*message.C2S_Gates)
+	a := args[1].(gate.Agent)
+
+	addresses := make([]string, 0)
+	gameID := make([]int32, 0)
+	gates := manager.GetServers(protos.ServerType_Gate)
+	games := manager.GetServers(protos.ServerType_Game)
+	for _, sa := range gates {
+		addresses = append(addresses, sa.Server.Address)
+	}
+	for _, g := range games {
+		gameID = append(gameID, g.Server.ID)
+	}
+	a.WriteMsg(&message.S2C_Gates{
+		GameID:    gameID,
+		Addresses: addresses,
+	})
 }
 
 func S2S_Reg(args []interface{}) {

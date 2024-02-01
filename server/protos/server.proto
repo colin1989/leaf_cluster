@@ -13,3 +13,9 @@ message Server {
   string Address = 2;
   ServerType Typ = 3;
 }
+
+message ServerMsg {
+  int32 ID = 1;
+  string Route = 2;
+  string Body = 3;
+}

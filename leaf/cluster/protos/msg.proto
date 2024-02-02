@@ -1,0 +1,48 @@
+syntax = "proto3";
+package actor;
+option go_package = "server/protos";
+
+import "server.proto";
+import "data.proto";
+
+message Bind {
+  int64 agentId = 1;
+  int64 uId = 2;
+  int32 sId = 3;
+}
+
+enum MsgType {
+  MsgLogin = 0;
+  MsgData = 1;
+}
+
+message Msg {
+  uint64 id = 1;
+  string route = 2;
+  repeated bytes data = 3;
+  MsgType type = 5;
+}
+
+// Gate -> Node
+message Request {
+  SessionData session = 1;
+  Msg msg = 2;
+  Server server = 3;
+}
+
+// Node -> Gate
+message Response {
+  SessionData session = 1;
+  Msg msg = 2;
+}
+
+// Node -> Gate
+message Kick {
+  int64 agentId = 1;
+  int64 uId = 2;
+}
+
+message Disconnect {
+  int64 agentId = 1;
+  int64 uId = 2;
+}

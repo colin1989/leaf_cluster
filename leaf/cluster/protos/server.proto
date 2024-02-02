@@ -2,10 +2,16 @@ syntax = "proto3";
 package actor;
 option go_package = "server/protos";
 
+// 服务内部数据与消息
+
 enum ServerType {
   NULL = 0;
-  Gate = 1;
-  Game = 2;
+  // 唯一节点
+  Master = 1;
+  // 可部署多个节点
+  Gate = 2;
+  // 非网关的所有节点
+  Node = 3;
 }
 
 message Server {
@@ -18,4 +24,12 @@ message ServerMsg {
   int32 ID = 1;
   string Route = 2;
   string Body = 3;
+}
+
+message Register {
+    Server Server = 1;
+}
+
+message WatchResponse {
+  repeated Server Servers = 1;
 }

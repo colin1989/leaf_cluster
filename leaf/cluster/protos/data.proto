@@ -1,0 +1,10 @@
+syntax = "proto3";
+package actor;
+option go_package = "server/protos";
+
+message SessionData {
+  int64 agentId = 1;
+  int64 uId = 2;
+  int32 sId = 3;
+  bytes data = 4;
+}

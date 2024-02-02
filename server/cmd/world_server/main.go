@@ -9,6 +9,6 @@ import (
 func main() {
 	leaf.Run(
 		world.Module,
-		world.GateModule,
+		//world.GateModule,
 	)
 }

@@ -4,11 +4,12 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math"
+	"reflect"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/name5566/leaf/chanrpc"
 	"github.com/name5566/leaf/log"
-	"math"
-	"reflect"
 )
 
 // -------------------------
@@ -99,7 +100,7 @@ func (p *Processor) SetRawHandler(id uint16, msgRawHandler MsgHandler) {
 }
 
 // goroutine safe
-func (p *Processor) Route(msg interface{}, userData interface{}) error {
+func (p *Processor) Route(msg interface{}, agent interface{}, data interface{}) error {
 	// raw
 	if msgRaw, ok := msg.(MsgRaw); ok {
 		if msgRaw.msgID >= uint16(len(p.msgInfo)) {
@@ -107,7 +108,7 @@ func (p *Processor) Route(msg interface{}, userData interface{}) error {
 		}
 		i := p.msgInfo[msgRaw.msgID]
 		if i.msgRawHandler != nil {
-			i.msgRawHandler([]interface{}{msgRaw.msgID, msgRaw.msgRawData, userData})
+			i.msgRawHandler([]interface{}{msgRaw.msgID, msgRaw.msgRawData, agent, data})
 		}
 		return nil
 	}
@@ -120,10 +121,10 @@ func (p *Processor) Route(msg interface{}, userData interface{}) error {
 	}
 	i := p.msgInfo[id]
 	if i.msgHandler != nil {
-		i.msgHandler([]interface{}{msg, userData})
+		i.msgHandler([]interface{}{msg, agent, data})
 	}
 	if i.msgRouter != nil {
-		i.msgRouter.Go(msgType, msg, userData)
+		i.msgRouter.Go(msgType, msg, agent, data)
 	}
 	return nil
 }

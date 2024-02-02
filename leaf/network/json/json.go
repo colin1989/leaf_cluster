@@ -97,7 +97,7 @@ func (p *Processor) SetRawHandler(msgID string, msgRawHandler MsgHandler) {
 }
 
 // goroutine safe
-func (p *Processor) Route(msg interface{}, userData interface{}) error {
+func (p *Processor) Route(msg interface{}, agent interface{}, data interface{}) error {
 	// raw
 	if msgRaw, ok := msg.(MsgRaw); ok {
 		i, ok := p.msgInfo[msgRaw.msgID]
@@ -105,7 +105,7 @@ func (p *Processor) Route(msg interface{}, userData interface{}) error {
 			return fmt.Errorf("message %v not registered", msgRaw.msgID)
 		}
 		if i.msgRawHandler != nil {
-			i.msgRawHandler([]interface{}{msgRaw.msgID, msgRaw.msgRawData, userData})
+			i.msgRawHandler([]interface{}{msgRaw.msgID, msgRaw.msgRawData, agent, data})
 		}
 		return nil
 	}
@@ -121,10 +121,10 @@ func (p *Processor) Route(msg interface{}, userData interface{}) error {
 		return fmt.Errorf("message %v not registered", msgID)
 	}
 	if i.msgHandler != nil {
-		i.msgHandler([]interface{}{msg, userData})
+		i.msgHandler([]interface{}{msg, agent, data})
 	}
 	if i.msgRouter != nil {
-		i.msgRouter.Go(msgType, msg, userData)
+		i.msgRouter.Go(msgType, msg, agent, data)
 	}
 	return nil
 }

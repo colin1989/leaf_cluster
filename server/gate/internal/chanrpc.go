@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"message"
 	"server/gate/constant"
-	"server/protos"
 
-	"github.com/name5566/leaf/log"
-
+	"github.com/name5566/leaf/cluster/protos"
 	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
 )
 
 func init() {
-	skeleton.RegisterChanRPC(constant.NewWorldFunc, NewWorldFunc)
+	//skeleton.RegisterChanRPC(constant.NewWorldFunc, NewWorldFunc)
 	skeleton.RegisterChanRPC(constant.NewGameFunc, NewGameFunc)
 	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
 	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)

@@ -22,7 +22,8 @@ func S2C_Msg(args []interface{}) {
 		log.Errorf("wrong agent id %v", m.Agent)
 		return
 	}
-	agent.WriteRaw(m.Body)
+	_ = agent
+	//agent.WriteRaw(m.Body)
 }
 
 func Kick(args []interface{}) {

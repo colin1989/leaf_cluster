@@ -3,8 +3,8 @@ package internal
 import (
 	"message"
 	"reflect"
-	"server/protos"
 
+	"github.com/name5566/leaf/cluster/protos"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 )

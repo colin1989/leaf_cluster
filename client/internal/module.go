@@ -20,7 +20,9 @@ func (m *Module) OnInit() {
 
 	m.Skeleton = skeleton
 
-	connectWorld()
+	client := Gate.Connect(1, "127.0.0.1:13561", "NewGameServer", 1)
+	client.AutoReconnect = false
+	//connectWorld()
 }
 
 func (m *Module) OnDestroy() {

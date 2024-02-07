@@ -15,6 +15,7 @@ func Destroy() {
 	if defaultCluster == nil {
 		return
 	}
+	defaultCluster.destroy()
 	close(defaultCluster.stop)
 }
 

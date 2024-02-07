@@ -10,6 +10,7 @@ type ClusterNode interface {
 	Server() *protos.Server
 	Listen(closeSig chan struct{})
 	GetProcessor() network.Processor
+	Destroy()
 }
 
 type ClusterRPC interface {

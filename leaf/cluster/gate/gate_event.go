@@ -46,6 +46,7 @@ func NewWorldFunc(args []interface{}) {
 
 	s.WriteMsg(&protos.Register{Server: gate.server})
 
+	gate.worldSession = s
 	log.Info("gate connect world")
 }
 
@@ -55,10 +56,10 @@ func NewNodeFunc(args []interface{}) {
 
 	_, ok := gate.NodeSessions[sid]
 	if ok {
-		log.Error("重复连接", log.Int32("sid", sid))
+		log.ErrorW("重复连接", log.Int32("sid", sid))
 	}
 	gate.NodeSessions[sid] = s
-	log.Info("gate connect node", log.Int32("sid", sid))
+	log.InfoW("gate connect node", log.Int32("sid", sid))
 
 	s.WriteMsg(&protos.Register{Server: gate.server})
 }
@@ -101,6 +102,30 @@ func OnRegister(args []interface{}) {
 	s := args[1].(*session.Session)
 
 	s.SetServer(m.Server)
+	log.InfoW("服务节点注册", log.Int32("serverID", m.Server.ID),
+		log.Int32("type", int32(m.Server.Typ)))
+}
+
+func OnOffline(args []interface{}) {
+	m := args[0].(*protos.Offline)
+	//s := args[1].(*session.Session)
+
+	server := m.Server
+	if client, ok := gate.NodeClients[server.ID]; ok {
+		// Close 里面有个wait...
+		go client.Close()
+	} else {
+		log.WarnW("服务下线, NodeClients数据不存在", log.Int32("serverID", server.ID))
+	}
+
+	if _, ok := gate.NodeSessions[server.ID]; ok {
+		gate.NodeSessions[server.ID].Close()
+		delete(gate.NodeSessions, server.ID)
+	} else {
+		log.WarnW("服务下线, NodeSessions数据不存在", log.Int32("serverID", server.ID))
+	}
+	log.InfoW("服务节点下线", log.Int32("serverID", m.Server.ID),
+		log.Int32("type", int32(m.Server.Typ)))
 }
 
 func OnBind(args []interface{}) {
@@ -120,6 +145,8 @@ func OnBind(args []interface{}) {
 
 	sd.UId = m.UId
 	sd.SId = m.SId
+	log.InfoW("用户数据Bind", log.Int64("agentID", m.AgentId),
+		log.Int64("userID", sd.UId), log.Int32("serverID", sd.SId))
 }
 
 func OnKick(args []interface{}) {
@@ -133,4 +160,5 @@ func OnKick(args []interface{}) {
 	}
 
 	a.Close()
+	log.InfoW("Kick", log.Int64("agentID", k.AgentId))
 }

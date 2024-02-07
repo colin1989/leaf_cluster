@@ -31,6 +31,7 @@ func init() {
 //}
 
 var Account = rand.Intn(100)
+var Code = rand.Intn(10000)
 
 func rpcNewAgent(args []interface{}) {
 	a := args[0].(agent.Agent)
@@ -65,7 +66,7 @@ func Login(args []interface{}) {
 	skeleton.Go(func() {
 		time.Sleep(time.Second)
 		a.WriteMsg(&message.Greeting{
-			Code:    1,
+			Code:    Code + 1,
 			Message: "hello from client",
 		})
 	}, func() {
@@ -84,13 +85,15 @@ func Greeting(args []interface{}) {
 
 	log.Infof("Account %v Server %v received Code %v Message %v", Account, ServerID, m.Code, m.Message)
 
-	//if m.Code > 10 {
-	//	return
-	//}
+	if Code != m.Code-1 {
+		log.FatalW("Code != m.Code-1", log.Int("account", Account), log.Int("serverID", ServerID),
+			log.Int("Code", m.Code), log.String("Message", m.Message))
+	}
+	Code = m.Code
 
 	time.Sleep(time.Second)
 	a.WriteMsg(&message.Greeting{
-		Code:    m.Code + 1,
+		Code:    Code + 1,
 		Message: "hello from client",
 	})
 

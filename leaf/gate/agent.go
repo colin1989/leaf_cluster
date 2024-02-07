@@ -28,13 +28,14 @@ var agentID = int64(0)
 func newAgent(conn network.Conn, gate *Gate) (network.Agent, int64) {
 	aid := atomic.LoadInt64(&agentID)
 	atomic.AddInt64(&agentID, 1)
-	return &agent{
+	a := &agent{
 		conn:        conn,
 		gate:        gate,
 		clusterGate: cluster.GetNode(),
 		id:          aid,
 		userData:    nil,
-	}, agentID
+	}
+	return a, a.id
 }
 
 const HeadLength = 8

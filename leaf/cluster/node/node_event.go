@@ -6,6 +6,14 @@ import (
 	"github.com/name5566/leaf/log"
 )
 
+func NewWorldFunc(args []interface{}) {
+	s := args[0].(*session.Session)
+
+	s.WriteMsg(&protos.Register{Server: node.server})
+
+	node.worldSession = s
+}
+
 func OnRequest(args []interface{}) {
 	request := args[0].(*protos.Request)
 	s := args[1].(*session.Session)
@@ -18,7 +26,7 @@ func OnRequest(args []interface{}) {
 		// 2. 反序列化处理消息
 		unmarshal, err := node.processor.Unmarshal(data)
 		if err != nil {
-			log.Error("Unmarshal error", log.FieldErr(err), log.Int64("UserID", sessionData.UId),
+			log.ErrorW("Unmarshal error", log.FieldErr(err), log.Int64("UserID", sessionData.UId),
 				log.String("Body", string(data)))
 			return
 		}
@@ -26,7 +34,7 @@ func OnRequest(args []interface{}) {
 		// 3. 路由
 		err = node.processor.Route(unmarshal, s, sessionData)
 		if err != nil {
-			log.Error("route error", log.FieldErr(err), log.Int64("UserID", sessionData.UId),
+			log.ErrorW("route error", log.FieldErr(err), log.Int64("UserID", sessionData.UId),
 				log.String("Body", string(data)))
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/name5566/leaf/cluster/config"
 	"github.com/name5566/leaf/cluster/protos"
 	"github.com/name5566/leaf/cluster/session"
+	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/network"
 )
 
@@ -30,7 +31,9 @@ func New(server *protos.Server, chanRpc *chanrpc.Server) *Master {
 		Set:     NewServerSet(),
 	}
 
+	chanRpc.Register("CloseSession", OnCloseSession)
 	chanRpc.Register(reflect.TypeOf(&protos.Register{}), OnRegister)
+	chanRpc.Register(reflect.TypeOf(&protos.Offline{}), OnOffline)
 
 	return master
 }
@@ -59,6 +62,10 @@ func (m *Master) Listen(closeSig chan struct{}) {
 	<-closeSig
 
 	wsServer.Close()
+}
+
+func (m *Master) Destroy() {
+	log.Info("世界服下线")
 }
 
 func (m *Master) SetWorldAdd(worldAddr string) {

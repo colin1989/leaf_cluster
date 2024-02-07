@@ -7,15 +7,17 @@ import (
 	"github.com/name5566/leaf/cluster/config"
 	"github.com/name5566/leaf/cluster/protos"
 	"github.com/name5566/leaf/cluster/session"
+	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/network"
 )
 
 type Node struct {
 	config.WSConfig
-	server    *protos.Server
-	processor network.Processor
-	chanRPC   *chanrpc.Server
-	worldAddr string
+	server       *protos.Server
+	processor    network.Processor
+	chanRPC      *chanrpc.Server
+	worldAddr    string
+	worldSession *session.Session
 }
 
 var node *Node = nil
@@ -29,6 +31,8 @@ func New(server *protos.Server, chanRpc *chanrpc.Server) *Node {
 	}
 
 	//chanRpc.Register("NewSessionFunc", NewSessionFunc)
+	chanRpc.Register("NewWorldFunc", NewWorldFunc)
+
 	chanRpc.Register(reflect.TypeOf(&protos.Request{}), OnRequest)
 	chanRpc.Register(reflect.TypeOf(&protos.Register{}), OnRegister)
 	return node
@@ -71,10 +75,9 @@ func (n *Node) connectToWorld(worldAddr string) *network.WSClient {
 	wsClient.MaxMsgLen = n.MaxMsgLen
 	wsClient.NewAgent = func(conn *network.WSConn) network.Agent {
 		s := session.NewSession(conn, n.processor, n.chanRPC)
-		//if n.chanRPC != nil {
-		//	n.chanRPC.Go("NewWorldFunc", s)
-		//}
-		s.WriteMsg(&protos.Register{Server: n.server})
+		if n.chanRPC != nil {
+			n.chanRPC.Go("NewWorldFunc", s)
+		}
 		return s
 	}
 
@@ -83,6 +86,11 @@ func (n *Node) connectToWorld(worldAddr string) *network.WSClient {
 	}
 
 	return wsClient
+}
+
+func (n *Node) Destroy() {
+	log.InfoW("node 下线", log.Int32("serverID", n.server.ID))
+	n.worldSession.WriteMsg(&protos.Offline{Server: n.server})
 }
 
 func (n *Node) SetWorldAdd(worldAddr string) {

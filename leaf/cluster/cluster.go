@@ -118,6 +118,9 @@ func listenProto(processor *protobuf.Processor, chanRpc *chanrpc.Server) {
 	processor.Register(&protos.WatchResponse{})
 	processor.SetRouter(&protos.WatchResponse{}, chanRpc)
 
+	processor.Register(&protos.Offline{})
+	processor.SetRouter(&protos.Offline{}, chanRpc)
+
 	processor.Register(&protos.Bind{})
 	processor.SetRouter(&protos.Bind{}, chanRpc)
 
@@ -141,6 +144,9 @@ func listenJSON(processor *json.Processor, chanRpc *chanrpc.Server) {
 	processor.Register(&protos.WatchResponse{})
 	processor.SetRouter(&protos.WatchResponse{}, chanRpc)
 
+	processor.Register(&protos.Offline{})
+	processor.SetRouter(&protos.Offline{}, chanRpc)
+
 	processor.Register(&protos.Bind{})
 	processor.SetRouter(&protos.Bind{}, chanRpc)
 
@@ -156,5 +162,15 @@ func GetNode() ClusterNode {
 }
 
 func (c *Cluster) listen() {
+	if c.Node == nil {
+		return
+	}
 	c.Node.Listen(defaultCluster.stop)
+}
+
+func (c *Cluster) destroy() {
+	if c.Node == nil {
+		return
+	}
+	c.Node.Destroy()
 }

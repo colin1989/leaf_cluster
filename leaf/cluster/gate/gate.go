@@ -7,6 +7,7 @@ import (
 	"github.com/name5566/leaf/cluster/config"
 	"github.com/name5566/leaf/cluster/protos"
 	"github.com/name5566/leaf/cluster/session"
+	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/network"
 )
 
@@ -19,6 +20,7 @@ type Gate struct {
 	chanRPC   *chanrpc.Server
 	worldAddr string
 
+	worldSession *session.Session
 	NodeClients  map[int32]*network.WSClient
 	NodeSessions map[int32]*session.Session
 }
@@ -43,6 +45,7 @@ func New(server *protos.Server, chanRpc *chanrpc.Server) *Gate {
 	chanRpc.Register(reflect.TypeOf(&protos.Response{}), OnResponse)
 	chanRpc.Register(reflect.TypeOf(&protos.WatchResponse{}), OnWatch)
 	chanRpc.Register(reflect.TypeOf(&protos.Register{}), OnRegister)
+	chanRpc.Register(reflect.TypeOf(&protos.Offline{}), OnOffline)
 	chanRpc.Register(reflect.TypeOf(&protos.Bind{}), OnBind)
 	chanRpc.Register(reflect.TypeOf(&protos.Kick{}), OnKick)
 
@@ -78,6 +81,11 @@ func (g *Gate) connectTo(sid int32, addr string, newSessionFunc string) *network
 	}
 
 	return wsClient
+}
+
+func (g *Gate) Destroy() {
+	log.InfoW("网关下线", log.Int32("serverID", g.server.ID))
+	g.worldSession.WriteMsg(&protos.Offline{Server: g.server})
 }
 
 func (g *Gate) SetWorldAdd(worldAddr string) {

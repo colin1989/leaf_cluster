@@ -1,16 +1,16 @@
 package main
 
 import (
+	"client/internal"
 	"flag"
 	"fmt"
 
 	"github.com/name5566/leaf"
 )
 
-var ServerID int
-
 func init() {
-	flag.IntVar(&ServerID, "s", 1, "连接游戏服ID")
+	flag.IntVar(&internal.ServerID, "s", 1, "连接游戏服ID")
+	flag.StringVar(&internal.GateAddr, "addr", "127.0.0.1:13561", "连接游戏服ID")
 }
 
 func main() {

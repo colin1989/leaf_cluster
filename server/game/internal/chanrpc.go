@@ -2,36 +2,19 @@ package internal
 
 import (
 	"fmt"
-	"message"
-	"server/protos"
 
-	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/cluster/session"
 )
 
-const NewWorldAgentFunc = "NewWorldFunc"
-
 func init() {
-	skeleton.RegisterChanRPC(NewWorldAgentFunc, NewWorldFunc)
 	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
-	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
+	skeleton.RegisterChanRPC("CloseSession", rpcCloseAgent)
 }
 
-func NewWorldFunc(args []interface{}) {
-	a := args[0].(gate.Agent)
-	//a.SetUserData(&GameData{})
-
-	a.WriteMsg(&message.S2S_Reg{Server: &protos.Server{
-		ID:      serverID,
-		Address: wsAddr,
-		Typ:     protos.ServerType_Game,
-	}})
-	fmt.Println("rpcNewWorldFunc!!!")
-}
-
-var Users = map[int]*UserData{}
+var Users = map[int64]*UserData{}
 
 func rpcNewAgent(args []interface{}) {
-	a := args[0].(gate.Agent)
+	a := args[0].(*session.Session)
 	_ = a
 	//a.WriteMsg()
 
@@ -39,7 +22,7 @@ func rpcNewAgent(args []interface{}) {
 }
 
 func rpcCloseAgent(args []interface{}) {
-	a := args[0].(gate.Agent)
+	a := args[0].(*session.Session)
 	_ = a
 
 	a.Close()

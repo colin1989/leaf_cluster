@@ -24,7 +24,7 @@ func (m *GateModule) OnInit() {
 		TCPAddr:         "",
 		LenMsgLen:       2,
 		LittleEndian:    false,
-		Processor:       NewGateProcessor(msg.JSONProcessor),
+		Processor:       msg.JSONProcessor, // NewGateProcessor(msg.JSONProcessor),
 		AgentChanRPC:    ChanRPC,
 	}
 }

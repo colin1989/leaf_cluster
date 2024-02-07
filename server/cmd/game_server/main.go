@@ -22,6 +22,5 @@ func main() {
 	game.SetWSAddr(wsAddr)
 	leaf.Run(
 		game.Module,
-		game.GateModule,
 	)
 }

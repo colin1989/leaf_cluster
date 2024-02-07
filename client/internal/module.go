@@ -20,16 +20,15 @@ func (m *Module) OnInit() {
 
 	m.Skeleton = skeleton
 
-	client := Gate.Connect(1, "127.0.0.1:13561", "NewGameServer", 1)
+	addr := GateAddr
+	if len(addr) == 0 {
+		addr = "127.0.0.1:13561"
+	}
+	client := Gate.Connect(1, addr, "NewGameServer", 1)
 	client.AutoReconnect = false
 	//connectWorld()
 }
 
 func (m *Module) OnDestroy() {
 	fmt.Println("module destroy")
-}
-
-func connectWorld() {
-	client := Gate.Connect(1, "127.0.0.1:12345", "NewWorldServer", 1)
-	client.AutoReconnect = false
 }

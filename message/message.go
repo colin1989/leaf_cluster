@@ -16,13 +16,7 @@ type (
 	Login struct {
 		Server  int32
 		Account int
-		Agent   int
-	}
-
-	Bind struct {
-		Agent  int
-		Server int32
-		UserID int
+		Agent   int64
 	}
 
 	Greeting struct {

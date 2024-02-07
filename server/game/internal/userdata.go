@@ -1,13 +1,15 @@
 package internal
 
-import "github.com/name5566/leaf/gate"
+import (
+	"github.com/name5566/leaf/agent"
+)
 
 type UserData struct {
-	Agent   gate.Agent
-	UserID  int
-	AgentID int
+	Agent   agent.Agent
+	UserID  int64
+	AgentID int64
 }
 
-func (ud *UserData) SetAgent(a gate.Agent) {
+func (ud *UserData) SetAgent(a agent.Agent) {
 	ud.Agent = a
 }

@@ -2,11 +2,12 @@ package internal
 
 import (
 	"fmt"
+	"math/rand"
 	"message"
 	"reflect"
 	"time"
 
-	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/agent"
 	"github.com/name5566/leaf/log"
 )
 
@@ -16,7 +17,7 @@ func init() {
 	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
 
 	skeleton.RegisterChanRPC(reflect.TypeOf(&message.Login{}), Login)
-	//skeleton.RegisterChanRPC(reflect.TypeOf(&message.S2C_Gates{}), S2C_Gates)
+	// skeleton.RegisterChanRPC(reflect.TypeOf(&message.S2C_Gates{}), S2C_Gates)
 	skeleton.RegisterChanRPC(reflect.TypeOf(&message.Greeting{}), Greeting)
 }
 
@@ -29,68 +30,32 @@ func init() {
 //	fmt.Println("NewWorldServer!!!")
 //}
 
-var Account = 1
+var Account = rand.Intn(100)
 
 func rpcNewAgent(args []interface{}) {
-	a := args[0].(gate.Agent)
-	serverID := args[1].(int32)
+	a := args[0].(agent.Agent)
 
 	log.Info("login", log.Int("Account", Account))
 
 	skeleton.AfterFunc(time.Second, func() {
 		a.WriteMsg(&message.Login{
-			Server:  serverID,
+			Server:  int32(ServerID),
 			Account: Account,
 		})
 	})
 	fmt.Println("rpcNewAgent!!!")
-
-	Account++
 }
 
 func rpcCloseAgent(args []interface{}) {
-	a := args[0].(gate.Agent)
+	a := args[0].(agent.Agent)
 	_ = a
 
-	connectWorld()
 	fmt.Println("rpcCloseAgent!!!")
 }
 
-//func S2C_Gates(args []interface{}) {
-//	m := args[0].(*message.S2C_Gates)
-//	//a := args[1].(gate.Agent)
-//
-//	gameID := int32(0)
-//	addr := ""
-//	rand.Shuffle(len(m.Addresses), func(i, j int) {
-//		tmp := m.Addresses[i]
-//		m.Addresses[i] = m.Addresses[j]
-//		m.Addresses[j] = tmp
-//	})
-//	rand.Shuffle(len(m.GameID), func(i, j int) {
-//		tmp := m.GameID[i]
-//		m.GameID[i] = m.GameID[j]
-//		m.GameID[j] = tmp
-//	})
-//	if len(m.GameID) > 0 {
-//		gameID = m.GameID[0]
-//	}
-//	if len(m.Addresses) > 0 {
-//		addr = m.Addresses[0]
-//	}
-//
-//	if addr == "" || gameID == 0 {
-//		return
-//	}
-//	log.Info("Connect to server", log.String("gate", addr),
-//		log.Int32("ServerID", gameID), log.Int("Account", Account))
-//	client := Gate.Connect(gameID, addr, "NewGameServer", 1)
-//	client.AutoReconnect = false
-//}
-
 func Login(args []interface{}) {
 	m := args[0].(*message.Login)
-	a := args[1].(gate.Agent)
+	a := args[1].(agent.Agent)
 
 	if a == nil || m == nil {
 		fmt.Println("Login")
@@ -104,21 +69,20 @@ func Login(args []interface{}) {
 			Message: "hello from client",
 		})
 	}, func() {
-		fmt.Println("Login")
+		log.Infof("Account %v Login Server %v", Account, ServerID)
 	})
-
 }
 
 func Greeting(args []interface{}) {
 	m := args[0].(*message.Greeting)
-	a := args[1].(gate.Agent)
+	a := args[1].(agent.Agent)
 
 	if a == nil || m == nil {
 		fmt.Println("greeting err")
 		return
 	}
 
-	fmt.Println("received", m.Code, m.Message)
+	log.Infof("Account %v Server %v received Code %v Message %v", Account, ServerID, m.Code, m.Message)
 
 	//if m.Code > 10 {
 	//	return
@@ -129,5 +93,7 @@ func Greeting(args []interface{}) {
 		Code:    m.Code + 1,
 		Message: "hello from client",
 	})
+
+	log.Infof("Account %v Server %v Send Code %v", Account, ServerID, m.Code+1)
 
 }

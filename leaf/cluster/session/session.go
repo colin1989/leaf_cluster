@@ -114,6 +114,14 @@ func (s *Session) WriteResponse(msg interface{}, sd *protos.SessionData) {
 	}
 }
 
+func (s *Session) Close() {
+	s.conn.Close()
+}
+
+func (s *Session) Destroy() {
+	s.conn.Destroy()
+}
+
 func (s *Session) Kick(uid, agentId int64) error {
 	if uid == 0 || agentId == 0 {
 		return fmt.Errorf("玩家 Id / agentId 错误")
@@ -134,14 +142,6 @@ func (s *Session) Kick(uid, agentId int64) error {
 	return nil
 }
 
-func (s *Session) Close() {
-	s.conn.Close()
-}
-
-func (s *Session) Destroy() {
-	s.conn.Destroy()
-}
-
 func (s *Session) Bind(aid, userID int64, sid int32) error {
 	if s.server == nil {
 		return fmt.Errorf("session 未绑定服务器数据")
@@ -158,6 +158,7 @@ func (s *Session) Bind(aid, userID int64, sid int32) error {
 }
 
 func (s *Session) ID() int64 {
+	log.Errorf("Session 并不会保存数据")
 	return 0
 }
 
